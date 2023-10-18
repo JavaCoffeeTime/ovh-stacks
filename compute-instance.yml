@@ -1,0 +1,41 @@
+heat_template_version: 2014-10-16
+
+description: Simple template to deploy a single compute instance with an attached volume
+
+parameters:
+  key_name:
+    type: string
+    description: Name of a KeyPair to enable SSH access to the instance
+    default: heat_key
+
+  image_id:
+    type: string
+    description: Name of a cloud image in the catalog
+    default: Debian 9
+
+  size_gb:
+    type: string
+    description: Size of the volume
+    default: 10
+
+resources:
+  my_instance:
+    type: OS::Nova::Server
+    properties:
+      key_name: { get_param: key_name }
+      image: { get_param: image_id }
+      flavor: c2-7
+      networks:
+        - network: Ext-Net
+
+  my_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: { get_param: size_gb }
+
+  my_attachment:
+      type: OS::Cinder::VolumeAttachment
+      properties:
+        instance_uuid:  { get_resource: my_instance }
+        volume_id: { get_resource: my_volume }
+        mountpoint: /dev/vdb
