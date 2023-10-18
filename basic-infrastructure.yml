@@ -1,0 +1,25 @@
+heat_template_version: 2014-10-16
+
+description: Simple template to deploy a single compute instance with an attached volume
+
+resources:
+  my_instance:
+    type: OS::Nova::Server
+    properties:
+      key_name: heat_key
+      image: Debian 9
+      flavor: c2-7
+      networks:
+        - network: Ext-Net
+
+  my_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: 10
+
+  my_attachment:
+      type: OS::Cinder::VolumeAttachment
+      properties:
+        instance_uuid:  { get_resource: my_instance }
+        volume_id: { get_resource: my_volume }
+        mountpoint: /dev/vdb
